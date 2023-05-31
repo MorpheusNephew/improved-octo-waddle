@@ -1,0 +1,14 @@
+@gameBaseUrl=https://statsapi.web.nhl.com/api/v1/game/2017020654
+@jsonContent=application/json
+
+### Live feed for game
+GET {{gameBaseUrl}}/feed/live
+Content-Type: {{jsonContent}}
+
+### Live feed diff patch for game
+GET {{gameBaseUrl}}/feed/live/diffPatch?startTimecode=20180113_174947
+Content-Type: {{jsonContent}}
+
+### Get game boxscore
+GET {{gameBaseUrl}}/boxscore
+Content-Type: {{jsonContent}}

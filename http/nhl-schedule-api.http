@@ -1,0 +1,10 @@
+@scheduleBaseUrl=https://statsapi.web.nhl.com/api/v1/schedule
+@jsonContent=application/json
+
+### Get current schedule
+GET {{scheduleBaseUrl}}
+Content-Type: {{jsonContent}}
+
+### Get 2022-2023 schedule
+GET {{scheduleBaseUrl}}?season=20222023
+Content-Type: {{jsonContent}}
