@@ -7,9 +7,6 @@ export class SeasonService {
   constructor(private readonly nhlService: NhlService) {}
 
   async load({ seasonId }: LoadSeasonDto) {
-    const seasonResponse = await this.nhlService.getSeason(seasonId);
-    return `This action loads a new season from seasonId: ${JSON.stringify(
-      seasonResponse,
-    )}`;
+    return this.nhlService.getSeason(seasonId);
   }
 }
