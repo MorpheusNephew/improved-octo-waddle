@@ -7,7 +7,7 @@ export class GameController {
   constructor(private readonly gameService: GameService) {}
 
   @Post()
-  load(@Body() loadGameDto: LoadGameDto) {
+  async load(@Body() loadGameDto: LoadGameDto) {
     return this.gameService.load(loadGameDto);
   }
 }
