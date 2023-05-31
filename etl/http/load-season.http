@@ -1,0 +1,7 @@
+### Load Season
+POST http://localhost:3000/season
+Content-Type: application/json
+
+{
+  "seasonId": "20182019"
+}
