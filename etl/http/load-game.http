@@ -1,0 +1,7 @@
+### Load Season
+POST http://localhost:3000/game
+Content-Type: application/json
+
+{
+  "gameId": "2017020654"
+}
