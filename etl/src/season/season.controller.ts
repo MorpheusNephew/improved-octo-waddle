@@ -7,7 +7,7 @@ export class SeasonController {
   constructor(private readonly seasonService: SeasonService) {}
 
   @Post()
-  load(@Body() loadSeasonDto: LoadSeasonDto) {
+  async load(@Body() loadSeasonDto: LoadSeasonDto) {
     return this.seasonService.load(loadSeasonDto);
   }
 }
