@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { LoadSeasonDto } from './dto/load-season';
+import { LoadSeasonDto } from './dto/load-season.dto';
 import { NhlService } from 'src/nhl/nhl.service';
 
 @Injectable()

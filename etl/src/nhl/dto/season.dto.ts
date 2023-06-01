@@ -1,4 +1,4 @@
-export class Season {
+export class SeasonDto {
   copyright: string;
   totalItems: number;
   metaData: {
