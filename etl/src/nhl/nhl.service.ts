@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Axios } from 'axios';
-import { GameDto } from 'src/nhl/dto/game.dto';
-import { SeasonDto } from 'src/nhl/dto/season.dto';
+import { SeasonDto, GameDto } from './dto';
 
 const nhlApiBaseUrl = 'https://statsapi.web.nhl.com/api/v1';
 
