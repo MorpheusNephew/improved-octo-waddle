@@ -1,0 +1,21 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type PlayerStat {
+  """Id of the game"""
+  gameId: String!
+}
+
+type Query {
+  playerStats: [PlayerStat!]!
+}
+
+type Mutation {
+  createPlayerStat(createPlayerStatInput: CreatePlayerStatInput!): PlayerStat!
+}
+
+input CreatePlayerStatInput {
+  """Example field (placeholder)"""
+  gameId: String!
+}
