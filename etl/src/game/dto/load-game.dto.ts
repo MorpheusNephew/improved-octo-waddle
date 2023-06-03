@@ -1,3 +1,3 @@
 export class LoadGameDto {
-  gameId: string;
+  gameId: number;
 }
