@@ -1,8 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { Axios } from 'axios';
 import { SeasonDto, GameDto } from './dto';
-
-const nhlApiBaseUrl = 'https://statsapi.web.nhl.com/api/v1';
 
 @Injectable()
 export class NhlService {
@@ -10,24 +8,28 @@ export class NhlService {
 
   constructor() {
     this.axios = new Axios({
-      baseURL: nhlApiBaseUrl,
+      baseURL: 'https://statsapi.web.nhl.com/api/v1',
       headers: { 'Content-Type': 'application/json' },
     });
   }
 
   async getSeason(seasonId: string): Promise<SeasonDto> {
-    const { data: seasonResponse } = await this.axios.get(
-      `/schedule?season=${seasonId}`,
-    );
+    const seasonResponse = await this.axios.get(`/schedule?season=${seasonId}`);
 
-    return JSON.parse(seasonResponse);
+    if (seasonResponse.status >= 400) {
+      throw new HttpException(seasonResponse.statusText, seasonResponse.status);
+    }
+
+    return JSON.parse(seasonResponse.data);
   }
 
-  async getGame(gameId: string): Promise<GameDto> {
-    const { data: gameResponse } = await this.axios.get(
-      `/game/${gameId}/feed/live`,
-    );
+  async getGame(gameId: number): Promise<GameDto> {
+    const gameResponse = await this.axios.get(`/game/${gameId}/feed/live`);
 
-    return JSON.parse(gameResponse);
+    if (gameResponse.status >= 400) {
+      throw new HttpException(gameResponse.statusText, gameResponse.status);
+    }
+
+    return JSON.parse(gameResponse.data);
   }
 }
