@@ -4,7 +4,7 @@ import { Column, Model, PrimaryKey, Table } from 'sequelize-typescript';
 export class PlayerGameStat extends Model {
   @PrimaryKey
   @Column
-  gameId: string;
+  gameId: number;
 
   @PrimaryKey
   @Column
