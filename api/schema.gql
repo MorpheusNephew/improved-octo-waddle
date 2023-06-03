@@ -2,20 +2,58 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type PlayerStat {
+type PlayerStats {
   """Id of the game"""
-  gameId: String!
+  gameId: Int!
+
+  """"""
+  playerId: Int!
+
+  """"""
+  playerName: String!
+
+  """"""
+  teamId: Int!
+
+  """"""
+  teamName: String!
+
+  """"""
+  playerAge: Int!
+
+  """"""
+  playerNumber: String!
+
+  """"""
+  playerPosition: String!
+
+  """"""
+  assists: Int!
+
+  """"""
+  goals: Int!
+
+  """"""
+  hits: Int!
+
+  """"""
+  points: Int!
+
+  """"""
+  penaltyMinutes: Int!
+
+  """"""
+  opponentTeamName: String!
+
+  """"""
+  opponentTeamId: Int!
 }
 
 type Query {
-  playerStats: [PlayerStat!]!
+  playerStats(queryPlayerStatsInput: QueryPlayerStatsInput!): [PlayerStats!]!
 }
 
-type Mutation {
-  createPlayerStat(createPlayerStatInput: CreatePlayerStatInput!): PlayerStat!
-}
-
-input CreatePlayerStatInput {
+input QueryPlayerStatsInput {
   """Example field (placeholder)"""
-  gameId: String!
+  gameId: Int!
 }

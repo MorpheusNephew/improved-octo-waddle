@@ -1,7 +1,7 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 
 @InputType()
 export class CreatePlayerStatInput {
-  @Field(() => String, { description: 'Example field (placeholder)' })
-  gameId: string;
+  @Field(() => Int, { description: 'Example field (placeholder)' })
+  gameId: number;
 }
