@@ -3,17 +3,19 @@ import { LoadGameDto } from './dto/load-game.dto';
 import { NhlService } from 'src/nhl/nhl.service';
 import { isEmpty } from 'lodash';
 import { PlayerGameDto, TeamDto } from 'src/nhl/dto/game.dto';
+import { PlayerGameStat } from './models/playerGameStat.model';
+import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
 export class GameService {
-  constructor(private readonly nhlService: NhlService) {}
+  constructor(
+    private readonly nhlService: NhlService,
+    @InjectModel(PlayerGameStat)
+    private readonly playerGameStatModel: typeof PlayerGameStat,
+  ) {}
 
   async load({ gameId }: LoadGameDto) {
     const game = await this.nhlService.getGame(gameId);
-
-    if (!game) {
-      throw `game with id (${gameId}) not found`;
-    }
 
     const {
       gameData: {
@@ -43,39 +45,33 @@ export class GameService {
 
           return {
             gameId,
-            player: {
-              id: player.person.id,
-              name: player.person.fullName,
-              number: playerInfo.primaryNumber,
-              position: playerInfo.primaryPosition,
-            },
-            team: {
-              id: playerInfo.currentTeam.id,
-              name: playerInfo.currentTeam.name,
-            },
+            playerId: player.person.id,
+            playerName: player.person.fullName,
+            teamId: playerInfo.currentTeam.id,
+            teamName: playerInfo.currentTeam.name,
             playerAge: playerInfo.currentAge,
             playerNumber: playerInfo.primaryNumber,
-            playerPosition: playerInfo.primaryPosition,
+            playerPosition: playerInfo.primaryPosition.name,
             assists: playerStats.assists,
             goals: playerStats.goals,
-            hits: playerStats.hits ?? 0,
+            hits: playerStats.hits,
             points: playerStats.assists + playerStats.goals, // https://en.wikipedia.org/wiki/Point_(ice_hockey)
-            penaltyMinutes: playerStats.penaltyMinutes ?? 0,
-            opponentTeam: {
-              id: opponentTeam.id,
-              name: opponentTeam.name,
-            },
+            penaltyMinutes: playerStats.penaltyMinutes,
+            opponentTeamName: opponentTeam.name,
+            opponentTeamId: opponentTeam.id,
           };
         });
 
     const homePlayerStats = extractPlayersStats(homePlayers, awayTeam);
     const awayPlayerStats = extractPlayersStats(awayPlayers, homeTeam);
 
-    const allPlayerStats = [...homePlayerStats, awayPlayerStats];
+    const allPlayerStats = [...homePlayerStats, ...awayPlayerStats];
 
-    console.log('Home player stats', JSON.stringify(homePlayerStats));
-    console.log('Away player stats', JSON.stringify(awayPlayerStats));
-    console.log('All player stats', JSON.stringify(allPlayerStats));
+    const results = await this.playerGameStatModel.bulkCreate(allPlayerStats, {
+      ignoreDuplicates: true,
+    });
+
+    console.log(results);
 
     return game;
   }
