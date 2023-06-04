@@ -6,6 +6,7 @@ import { QueryPlayerStatsInput } from './dto/query-player-stats.input';
 import { PlayerStats } from './entities/player-stats.entity';
 import { ClientProxy } from '@nestjs/microservices';
 import { randomUUID } from 'crypto';
+import { GraphQLError } from 'graphql';
 
 @Injectable()
 export class PlayerStatsService {
@@ -16,6 +17,13 @@ export class PlayerStatsService {
   ) {}
 
   loadPlayersStats({ gameId, seasonId }: LoadPlayersStatsInput) {
+    if ((gameId && seasonId) || !(gameId && seasonId)) {
+      throw new GraphQLError(
+        'Invalid argument: must use either gameId or seasonId',
+        { extensions: { code: 'BAD_USER_INPUT' } },
+      );
+    }
+
     const statusId = randomUUID();
     const type = gameId ? 'game' : 'season';
     const typeId = gameId ?? seasonId;
