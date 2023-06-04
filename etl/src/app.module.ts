@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { SeasonModule } from './season/season.module';
 import { GameModule } from './game/game.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigModule } from '@nestjs/config';
+import { GameService } from './game/game.service';
+import { SeasonService } from './season/season.service';
+import { NhlService } from './nhl/nhl.service';
+import { PlayerGameStat } from './game/models/playerGameStat.model';
 
 @Module({
   imports: [
@@ -23,8 +26,9 @@ import { ConfigModule } from '@nestjs/config';
       autoLoadModels: true,
       synchronize: true,
     }),
+    SequelizeModule.forFeature([PlayerGameStat]),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [GameService, SeasonService, NhlService],
 })
 export class AppModule {}
