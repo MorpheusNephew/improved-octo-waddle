@@ -7,7 +7,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env'] }),
+    ConfigModule.forRoot({ envFilePath: ['.env'] }),
     PlayerStatsModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,

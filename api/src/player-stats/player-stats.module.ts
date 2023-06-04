@@ -4,9 +4,11 @@ import { PlayerStatsResolver } from './player-stats.resolver';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { PlayerGameStat } from './models/playerGameStat.model';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ envFilePath: ['.env'] }),
     SequelizeModule.forFeature([PlayerGameStat]),
     ClientsModule.register([
       {
