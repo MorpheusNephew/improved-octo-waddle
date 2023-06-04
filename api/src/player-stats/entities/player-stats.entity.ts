@@ -17,7 +17,7 @@ export class PlayerStats {
   @Field(() => String, { description: '' })
   teamName: string;
 
-  @Field(() => Int, { description: '' })
+  @Field(() => Int, { description: '', nullable: true })
   playerAge: number;
 
   @Field(() => String, { description: '' })
