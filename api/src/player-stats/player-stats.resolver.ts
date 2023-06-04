@@ -1,23 +1,22 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { PlayerStatsService } from './player-stats.service';
-import { PlayerStats } from './entities/player-stat.entity';
-import { CreatePlayerStatInput } from './dto/create-player-stat.input';
+import { PlayerStats } from './entities/player-stats.entity';
+import { LoadPlayersStatsInput } from './dto/load-players-stats.input';
 import { QueryPlayerStatsInput } from './dto/query-player-stats.input';
+import { LoadPlayersStatsEvent } from './entities/load-players-stats-event.entity';
 
 @Resolver(() => PlayerStats)
 export class PlayerStatsResolver {
   constructor(private readonly playerStatsService: PlayerStatsService) {}
 
-  // @Mutation(() => PlayerStats)
-  // loadPlayerStats(
-  //   @Args('createPlayerStatInput') createPlayerStatInput: CreatePlayerStatInput,
-  // ): PlayerStats {
-  //   const message = this.playerStatsService.load(createPlayerStatInput);
+  @Mutation(() => LoadPlayersStatsEvent)
+  loadPlayersStats(
+    @Args('loadPlayersStatsInput') loadPlayersStatsInput: LoadPlayersStatsInput,
+  ): LoadPlayersStatsEvent {
+    const statusId = this.playerStatsService.load(loadPlayersStatsInput);
 
-  //   console.log(message);
-
-  //   return { gameId: createPlayerStatInput.gameId };
-  // }
+    return { statusId };
+  }
 
   @Query(() => [PlayerStats], { name: 'playerStats' })
   async queryPlayersStats(
