@@ -17,7 +17,7 @@ export class PlayerStatsService {
   ) {}
 
   loadPlayersStats({ gameId, seasonId }: LoadPlayersStatsInput) {
-    if ((gameId && seasonId) || !(gameId && seasonId)) {
+    if ((gameId && seasonId) || (!gameId && !seasonId)) {
       throw new GraphQLError(
         'Invalid argument: must use either gameId or seasonId',
         { extensions: { code: 'BAD_USER_INPUT' } },
