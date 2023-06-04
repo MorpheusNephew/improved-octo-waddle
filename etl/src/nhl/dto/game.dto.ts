@@ -47,6 +47,10 @@ export class PlayerGameDto {
   stats: PlayerStatsDto;
 }
 
+export type AbstractGameState = 'Preview' | 'Live' | 'Final';
+export type GamePlayers = Record<string, PlayerDto>;
+export type PlayersBoxscore = Record<string, PlayerGameDto>;
+
 export class GameDto {
   gamePk: number;
   gameData: {
@@ -59,22 +63,22 @@ export class GameDto {
       dateTime: string;
     };
     status: {
-      abstractGameState: string;
+      abstractGameState: AbstractGameState;
     };
     teams: {
       home: TeamDto;
       away: TeamDto;
     };
-    players: Record<string, PlayerDto>;
+    players: GamePlayers;
   };
   liveData: {
     boxscore: {
       teams: {
         home: {
-          players: Record<string, PlayerGameDto>;
+          players: PlayersBoxscore;
         };
         away: {
-          players: Record<string, PlayerGameDto>;
+          players: PlayersBoxscore;
         };
       };
     };
