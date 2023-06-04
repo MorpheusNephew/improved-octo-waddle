@@ -28,13 +28,11 @@ export class PlayerStatsService {
     const type = gameId ? 'game' : 'season';
     const typeId = gameId ?? seasonId;
 
-    const result = this.client.emit('load_players_stats', {
+    this.client.emit('load_players_stats', {
       type,
       typeId,
       statusId,
     });
-
-    console.log({ result });
 
     return statusId;
   }
