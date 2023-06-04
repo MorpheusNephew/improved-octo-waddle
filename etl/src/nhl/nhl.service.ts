@@ -1,16 +1,19 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { Axios } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { SeasonDto, GameDto } from './dto';
+import axiosRetry from 'axios-retry';
 
 @Injectable()
 export class NhlService {
-  private readonly axios: Axios;
+  private readonly axios: AxiosInstance;
 
   constructor() {
-    this.axios = new Axios({
+    this.axios = axios.create({
       baseURL: 'https://statsapi.web.nhl.com/api/v1',
       headers: { 'Content-Type': 'application/json' },
     });
+
+    axiosRetry(this.axios, { retries: 3 });
   }
 
   async getSeason(seasonId: string): Promise<SeasonDto> {
@@ -20,7 +23,7 @@ export class NhlService {
       throw new HttpException(seasonResponse.statusText, seasonResponse.status);
     }
 
-    return JSON.parse(seasonResponse.data);
+    return seasonResponse.data;
   }
 
   async getGame(gameId: number): Promise<GameDto> {
@@ -30,6 +33,6 @@ export class NhlService {
       throw new HttpException(gameResponse.statusText, gameResponse.status);
     }
 
-    return JSON.parse(gameResponse.data);
+    return gameResponse.data;
   }
 }
