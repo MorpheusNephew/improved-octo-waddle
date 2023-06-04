@@ -2,23 +2,52 @@ services:
   db:
     image: postgres
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - ./data/pg_data/db:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=sports
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
       - 5432:5432
-  etl:
-    build: ./etl
+  rabbitMq:
+    image: rabbitmq:management
+    volumes:
+      - ./data/rabbit_data:/var/lib/rabbitmq
+    ports:
+      - 15672:15672
+      - 5672:5672
+  api:
+    build: ./api
     environment:
       - PORT=3000
       - POSTGRES_DB=sports
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_HOST=localhost
+      - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
+      - RABBITMQ_HOST=rabbitMq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_QUEUE=stats_ingest_queue
     ports:
       - 3000:3000
     depends_on:
       - db
+      - etl
+      - rabbitMq
+
+  etl:
+    build: ./etl
+    environment:
+      - POSTGRES_DB=sports
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - RABBITMQ_HOST=rabbitMq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_QUEUE=stats_ingest_queue
+    deploy:
+      replicas: 3
+    depends_on:
+      - db
+      - rabbitMq
