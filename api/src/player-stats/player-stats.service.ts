@@ -15,7 +15,7 @@ export class PlayerStatsService {
     @Inject('INGEST_SERVICE') private readonly client: ClientProxy,
   ) {}
 
-  load({ gameId, seasonId }: LoadPlayersStatsInput) {
+  loadPlayersStats({ gameId, seasonId }: LoadPlayersStatsInput) {
     const statusId = randomUUID();
     const type = gameId ? 'game' : 'season';
     const typeId = gameId ?? seasonId;

@@ -13,7 +13,7 @@ export class PlayerStatsResolver {
   loadPlayersStats(
     @Args('loadPlayersStatsInput') loadPlayersStatsInput: LoadPlayersStatsInput,
   ): LoadPlayersStatsEvent {
-    const statusId = this.playerStatsService.load(loadPlayersStatsInput);
+    const statusId = this.playerStatsService.loadPlayersStats(loadPlayersStatsInput);
 
     return { statusId };
   }

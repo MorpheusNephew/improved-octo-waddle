@@ -11,7 +11,7 @@ import { PlayerGameStat } from './game/models/playerGameStat.model';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env'] }),
+    ConfigModule.forRoot({ envFilePath: ['.env'] }),
     SeasonModule,
     GameModule,
     SequelizeModule.forRoot({
