@@ -18,7 +18,6 @@ export class PlayerDto {
   primaryNumber: string;
   birthDate: string;
   currentAge: number;
-  currentTeam: TeamDto;
   primaryPosition: PositionDto;
 }
 
