@@ -19,11 +19,11 @@ export class PlayerGameStat extends Model {
   @Column
   teamName: string;
 
-  @Column
-  playerAge: number;
+  @Column({ allowNull: true })
+  playerAge?: number;
 
-  @Column
-  playerNumber: string;
+  @Column({ allowNull: true })
+  playerNumber?: string;
 
   @Column
   playerPosition: string;
