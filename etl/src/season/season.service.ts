@@ -18,13 +18,9 @@ export class SeasonService {
 
     const getGamesForDateMapper = async (date: {
       games: { gamePk: number }[];
-    }) => await pMap(date.games, loadGamesMapper, { concurrency: 4 });
+    }) => await pMap(date.games, loadGamesMapper);
 
-    const result = await pMap(season.dates, getGamesForDateMapper, {
-      concurrency: 1,
-    });
-
-    console.log(result);
+    await pMap(season.dates, getGamesForDateMapper);
 
     return season;
   }
