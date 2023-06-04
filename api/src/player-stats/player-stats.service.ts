@@ -7,6 +7,7 @@ import { PlayerStats } from './entities/player-stats.entity';
 import { ClientProxy } from '@nestjs/microservices';
 import { randomUUID } from 'crypto';
 import { GraphQLError } from 'graphql';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class PlayerStatsService {
@@ -37,17 +38,71 @@ export class PlayerStatsService {
     return statusId;
   }
 
-  async queryPlayerStats({
-    gameId,
-  }: QueryPlayerStatsInput): Promise<PlayerStats[]> {
+  async queryPlayerStats(
+    queryPlayerStatsInput: QueryPlayerStatsInput,
+  ): Promise<PlayerStats[]> {
+    const { options: { limit = undefined, offset = undefined } = {} } =
+      queryPlayerStatsInput;
+
     const result = (
       await this.playerGameStatModel.findAll({
-        where: {
-          gameId,
-        },
+        where: this.generateWhereClause(queryPlayerStatsInput),
+        limit,
+        offset,
       })
     ).map((playerGameStats) => playerGameStats.dataValues);
 
     return result;
+  }
+
+  private generateWhereClause({
+    gameIds,
+    playerIds,
+    playerNumbers,
+    playerAge,
+    playerAssists,
+    playerGoals,
+    playerHits,
+    playerPoints,
+  }: QueryPlayerStatsInput) {
+    const clauseInputs: {
+      data: any;
+      column: string;
+      operator?: boolean;
+      key?: string;
+    }[] = [
+      { data: gameIds, column: 'gameId' },
+      { data: playerIds, column: 'playerId' },
+      { data: playerNumbers, column: 'playerNumber' },
+      { data: playerAge, column: 'playerAge', operator: true, key: 'age' },
+      {
+        data: playerAssists,
+        column: 'assists',
+        operator: true,
+        key: 'assists',
+      },
+      { data: playerGoals, column: 'goals', operator: true, key: 'assists' },
+      { data: playerHits, column: 'hits', operator: true, key: 'hits' },
+      { data: playerPoints, column: 'points', operator: true, key: 'points' },
+    ];
+    const whereClause: Record<any, any> = {};
+
+    for (const clauseInput of clauseInputs) {
+      if (!clauseInput.data) {
+        continue;
+      }
+
+      if (clauseInput.operator) {
+        whereClause[clauseInput.column] = {
+          [Op[clauseInput.data.operator]]: clauseInput.data[clauseInput.key],
+        };
+      } else {
+        whereClause[clauseInput.column] = {
+          [Op.in]: clauseInput.data,
+        };
+      }
+    }
+
+    return whereClause;
   }
 }
