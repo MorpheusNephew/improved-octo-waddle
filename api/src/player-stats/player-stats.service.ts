@@ -60,30 +60,28 @@ export class PlayerStatsService {
     playerIds,
     playerNumbers,
     playerAge,
-    playerAssists,
-    playerGoals,
-    playerHits,
-    playerPoints,
+    assists,
+    goals,
+    hits,
+    points,
   }: QueryPlayerStatsInput) {
     const clauseInputs: {
       data: any;
       column: string;
       operator?: boolean;
-      key?: string;
     }[] = [
       { data: gameIds, column: 'gameId' },
       { data: playerIds, column: 'playerId' },
       { data: playerNumbers, column: 'playerNumber' },
-      { data: playerAge, column: 'playerAge', operator: true, key: 'age' },
+      { data: playerAge, column: 'playerAge', operator: true },
       {
-        data: playerAssists,
+        data: assists,
         column: 'assists',
         operator: true,
-        key: 'assists',
       },
-      { data: playerGoals, column: 'goals', operator: true, key: 'assists' },
-      { data: playerHits, column: 'hits', operator: true, key: 'hits' },
-      { data: playerPoints, column: 'points', operator: true, key: 'points' },
+      { data: goals, column: 'goals', operator: true },
+      { data: hits, column: 'hits', operator: true },
+      { data: points, column: 'points', operator: true },
     ];
     const whereClause: Record<any, any> = {};
 
@@ -94,7 +92,7 @@ export class PlayerStatsService {
 
       if (clauseInput.operator) {
         whereClause[clauseInput.column] = {
-          [Op[clauseInput.data.operator]]: clauseInput.data[clauseInput.key],
+          [Op[clauseInput.data.operator]]: clauseInput.data.value,
         };
       } else {
         whereClause[clauseInput.column] = {

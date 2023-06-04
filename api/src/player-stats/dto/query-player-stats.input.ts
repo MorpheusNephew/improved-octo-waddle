@@ -13,39 +13,12 @@ export class QueryPlayerStatsQueryOptionsInput {
 }
 
 @InputType()
-class QueryPlayerStatsInputBase {
+class QueryPlayerStatsStatisticsInput {
   @Field(() => String, { description: '' })
   operator: 'eq' | 'lt' | 'lte' | 'gt' | 'gte';
-}
 
-@InputType()
-export class QueryPlayerStatsAgeInput extends QueryPlayerStatsInputBase {
-  @Field(() => Int, { description: '' })
-  age: number;
-}
-
-@InputType()
-export class QueryPlayerStatsAssistsInput extends QueryPlayerStatsInputBase {
-  @Field(() => Int, { description: '' })
-  assists: number;
-}
-
-@InputType()
-export class QueryPlayerStatsGoalsInput extends QueryPlayerStatsInputBase {
-  @Field(() => Int, { description: '' })
-  goals: number;
-}
-
-@InputType()
-export class QueryPlayerStatsHitsInput extends QueryPlayerStatsInputBase {
-  @Field(() => Int, { description: '' })
-  hits: number;
-}
-
-@InputType()
-export class QueryPlayerStatsPointsInput extends QueryPlayerStatsInputBase {
-  @Field(() => Int, { description: '' })
-  points: number;
+  @Field(() => Int, {description: ''})
+  value: number;
 }
 
 @InputType()
@@ -68,21 +41,21 @@ export class QueryPlayerStatsInput {
   })
   options?: QueryPlayerStatsQueryOptionsInput;
 
-  @Field(() => QueryPlayerStatsAgeInput, { description: '', nullable: true })
-  playerAge: QueryPlayerStatsAgeInput;
+  @Field(() => QueryPlayerStatsStatisticsInput, { description: '', nullable: true })
+  playerAge: QueryPlayerStatsStatisticsInput;
 
-  @Field(() => QueryPlayerStatsAssistsInput, {
+  @Field(() => QueryPlayerStatsStatisticsInput, {
     description: '',
     nullable: true,
   })
-  playerAssists: QueryPlayerStatsAssistsInput;
+  assists: QueryPlayerStatsStatisticsInput;
 
-  @Field(() => QueryPlayerStatsGoalsInput, { description: '', nullable: true })
-  playerGoals: QueryPlayerStatsGoalsInput;
+  @Field(() => QueryPlayerStatsStatisticsInput, { description: '', nullable: true })
+  goals: QueryPlayerStatsStatisticsInput;
 
-  @Field(() => QueryPlayerStatsHitsInput, { description: '', nullable: true })
-  playerHits: QueryPlayerStatsHitsInput;
+  @Field(() => QueryPlayerStatsStatisticsInput, { description: '', nullable: true })
+  hits: QueryPlayerStatsStatisticsInput;
 
-  @Field(() => QueryPlayerStatsPointsInput, { description: '', nullable: true })
-  playerPoints: QueryPlayerStatsPointsInput;
+  @Field(() => QueryPlayerStatsStatisticsInput, { description: '', nullable: true })
+  points: QueryPlayerStatsStatisticsInput;
 }
