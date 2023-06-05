@@ -1,19 +1,14 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { SeasonModule } from './season/season.module';
-import { GameModule } from './game/game.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigModule } from '@nestjs/config';
-import { GameService } from './game/game.service';
-import { SeasonService } from './season/season.service';
-import { NhlService } from './nhl/nhl.service';
 import { PlayerGameStat } from './game/models/playerGameStat.model';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: ['.env'] }),
     SeasonModule,
-    GameModule,
     SequelizeModule.forRoot({
       dialect: 'postgres',
       host: process.env.POSTGRES_HOST,
@@ -29,6 +24,6 @@ import { PlayerGameStat } from './game/models/playerGameStat.model';
     SequelizeModule.forFeature([PlayerGameStat]),
   ],
   controllers: [AppController],
-  providers: [GameService, SeasonService, NhlService],
+  providers: [],
 })
 export class AppModule {}
