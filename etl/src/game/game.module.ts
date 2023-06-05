@@ -6,6 +6,11 @@ import { PlayerGameStat } from './models/playerGameStat.model';
 
 @Module({
   imports: [SequelizeModule.forFeature([PlayerGameStat])],
+  exports: [
+    SequelizeModule.forFeature([PlayerGameStat]),
+    NhlService,
+    GameService,
+  ],
   providers: [GameService, NhlService],
 })
 export class GameModule {}
