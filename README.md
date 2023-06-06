@@ -78,6 +78,8 @@ sequenceDiagram
 
 ### Querying stats
 
+The diagram below goes over the flow for querying player stats. The client makes a GraphQL query which gets transformed into a SQL query and the results are returned.
+
 ```mermaid
 sequenceDiagram
   Client->>GraphQL: make query request for data
