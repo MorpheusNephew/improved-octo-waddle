@@ -1,16 +1,16 @@
 import { Module } from '@nestjs/common';
 import { GameService } from './game.service';
-import { NhlService } from 'src/nhl/nhl.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { PlayerGameStat } from './models/playerGameStat.model';
+import { NhlModule } from '../nhl/nhl.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([PlayerGameStat])],
+  imports: [SequelizeModule.forFeature([PlayerGameStat]), NhlModule],
   exports: [
     SequelizeModule.forFeature([PlayerGameStat]),
-    NhlService,
     GameService,
+    NhlModule,
   ],
-  providers: [GameService, NhlService],
+  providers: [GameService],
 })
 export class GameModule {}
