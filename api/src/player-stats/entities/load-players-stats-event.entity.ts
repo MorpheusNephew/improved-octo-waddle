@@ -1,10 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
-export class LoadPlayersStatsEvent {
+export class LoadPlayersStatsStarted {
   @Field(() => String, {
     description:
-      "The ID used to determine the status of loading players' statistics",
+      "Message stating statistics for players are being loaded",
   })
-  statusId: string;
+  message: string;
 }

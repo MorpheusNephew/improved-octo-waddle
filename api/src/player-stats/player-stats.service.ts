@@ -5,7 +5,6 @@ import { PlayerGameStat } from './models/playerGameStat.model';
 import { QueryPlayerStatsInput } from './dto/query-player-stats.input';
 import { PlayerStats } from './entities/player-stats.entity';
 import { ClientProxy } from '@nestjs/microservices';
-import { randomUUID } from 'crypto';
 import { GraphQLError } from 'graphql';
 import { Op } from 'sequelize';
 
@@ -24,18 +23,13 @@ export class PlayerStatsService {
         { extensions: { code: 'BAD_USER_INPUT' } },
       );
     }
-
-    const statusId = randomUUID();
     const type = gameId ? 'game' : 'season';
     const typeId = gameId ?? seasonId;
 
     this.client.emit('load_players_stats', {
       type,
       typeId,
-      statusId,
     });
-
-    return statusId;
   }
 
   async queryPlayerStats(

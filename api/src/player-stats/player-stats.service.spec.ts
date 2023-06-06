@@ -57,13 +57,13 @@ describe('PlayerStatsService', () => {
       },
     ])('should ', ({ seasonId, gameId, expectedResult }) => {
       // Act
-      const statusId = service.loadPlayersStats({ seasonId, gameId });
+      service.loadPlayersStats({ seasonId, gameId });
 
       // Assert
-      expect(mockedEmit).toHaveBeenCalledWith('load_players_stats', {
-        ...expectedResult,
-        statusId,
-      });
+      expect(mockedEmit).toHaveBeenCalledWith(
+        'load_players_stats',
+        expectedResult,
+      );
     });
   });
 

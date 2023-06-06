@@ -3,19 +3,25 @@ import { PlayerStatsService } from './player-stats.service';
 import { PlayerStats } from './entities/player-stats.entity';
 import { LoadPlayersStatsInput } from './dto/load-players-stats.input';
 import { QueryPlayerStatsInput } from './dto/query-player-stats.input';
-import { LoadPlayersStatsEvent } from './entities/load-players-stats-event.entity';
+import { LoadPlayersStatsStarted } from './entities/load-players-stats-event.entity';
 
 @Resolver(() => PlayerStats)
 export class PlayerStatsResolver {
   constructor(private readonly playerStatsService: PlayerStatsService) {}
 
-  @Mutation(() => LoadPlayersStatsEvent)
+  @Mutation(() => LoadPlayersStatsStarted)
   loadPlayersStats(
     @Args('loadPlayersStatsInput') loadPlayersStatsInput: LoadPlayersStatsInput,
-  ): LoadPlayersStatsEvent {
-    const statusId = this.playerStatsService.loadPlayersStats(loadPlayersStatsInput);
+  ): LoadPlayersStatsStarted {
+    this.playerStatsService.loadPlayersStats(loadPlayersStatsInput);
 
-    return { statusId };
+    return {
+      message: `Loading player stats for ${
+        loadPlayersStatsInput.gameId ? 'game' : 'season'
+      } ${
+        loadPlayersStatsInput.gameId ?? loadPlayersStatsInput.seasonId
+      } has begun`,
+    };
   }
 
   @Query(() => [PlayerStats], { name: 'playerStats' })
