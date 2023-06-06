@@ -4,19 +4,13 @@ export class TeamDto {
 }
 
 export class PositionDto {
-  code: string;
   name: string;
-  type: string;
-  abbreviation: string;
 }
 
-export class PlayerDto {
+export class PlayerInfoDto {
   id: number;
   fullName: string;
-  firstName: string;
-  lastName: string;
   primaryNumber: string;
-  birthDate: string;
   currentAge: number;
   primaryPosition: PositionDto;
 }
@@ -41,14 +35,14 @@ export class PlayerStatsDto {
 }
 
 export class PlayerGameDto {
-  person: Pick<PlayerDto, 'id' | 'fullName'>;
+  person: Pick<PlayerInfoDto, 'id' | 'fullName'>;
   jerseyNumber: string;
   position: PositionDto;
   stats: PlayerStatsDto;
 }
 
 export type AbstractGameState = 'Preview' | 'Live' | 'Final';
-export type GamePlayers = Record<string, PlayerDto>;
+export type GamePlayers = Record<string, PlayerInfoDto>;
 export type PlayersBoxscore = Record<string, PlayerGameDto>;
 
 export class GameDto {
@@ -58,9 +52,6 @@ export class GameDto {
       pk: number;
       season: string;
       type: string;
-    };
-    datetime: {
-      dateTime: string;
     };
     status: {
       abstractGameState: AbstractGameState;
