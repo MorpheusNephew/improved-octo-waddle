@@ -34,7 +34,7 @@ docker compose down
 
 ## Usage
 
-After running the `docker compose up` command before using the API check the health check (GET http://localhost:3000/health) since RabbitMQ takes some time to setup even with the queue already being created and also for PostgreSQL to initialize itself for the first time. This was done intentional, registering with RabbitMQ synchronously since with docker compose having a service depend on another service to start doesn't meant that the dependency service is ready to accept requests.
+After running the `docker compose up` command before using the API check the health check (GET http://localhost:3000/health) since RabbitMQ takes some time to setup even with the queue already being created. PostgreSQL has been seeded with stats from all games ranging from the 20162017 season to the 20182019 season.
 
 Once everything is up and running you can check out the GraphQL schema and documentation by going to [playground](https://docs.nestjs.com/graphql/quick-start#graphql-playground) at http://localhost:3000/graphql
 
