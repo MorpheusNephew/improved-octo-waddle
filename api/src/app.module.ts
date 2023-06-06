@@ -4,6 +4,7 @@ import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -27,5 +28,6 @@ import { SequelizeModule } from '@nestjs/sequelize';
       synchronize: true,
     }),
   ],
+  controllers: [AppController],
 })
 export class AppModule {}
