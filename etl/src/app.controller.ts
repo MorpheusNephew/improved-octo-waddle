@@ -12,9 +12,7 @@ export class AppController {
   ) {}
 
   @EventPattern('load_players_stats')
-  async loadPlayersStats({ statusId, type, typeId }: PlayersStatsIngestRequestDto) {
-    console.log({ statusId });
-
+  async loadPlayersStats({ type, typeId }: PlayersStatsIngestRequestDto) {
     if (type === 'game') {
       await this.gameService.load(typeId as number);
     } else if (type === 'season') {
@@ -22,7 +20,5 @@ export class AppController {
     } else {
       throw new Error('Invalid type');
     }
-
-    console.log('Finished running', { statusId });
   }
 }
