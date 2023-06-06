@@ -68,4 +68,6 @@ describe('PlayerStatsService', () => {
   });
 
   describe('queryPlayerStats', () => {});
+
+  describe('generateWhereClause', () => {});
 });

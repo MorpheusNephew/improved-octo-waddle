@@ -1,39 +1,23 @@
-import { Injectable } from '@nestjs/common';
-import { NhlService } from 'src/nhl/nhl.service';
+import { Injectable, Logger } from '@nestjs/common';
+import { NhlService } from '../nhl/nhl.service';
 import { isEmpty } from 'lodash';
 import {
   AbstractGameState,
   PlayersBoxscore,
   TeamDto,
-} from 'src/nhl/dto/game.dto';
+} from '../nhl/dto/game.dto';
 import { PlayerGameStat } from './models/playerGameStat.model';
 import { InjectModel } from '@nestjs/sequelize';
-import { Logger, createLogger, transports } from 'winston';
 
 @Injectable()
 export class GameService {
-  private readonly logger: Logger;
+  private readonly logger = new Logger('GameService', { timestamp: true });
 
   constructor(
     private readonly nhlService: NhlService,
     @InjectModel(PlayerGameStat)
     private readonly playerGameStatModel: typeof PlayerGameStat,
-  ) {
-    this.logger = createLogger({
-      transports: [
-        new transports.File({
-          level: 'error',
-          handleRejections: true,
-          handleExceptions: true,
-          filename: `logs/errors/${new Date().toISOString()}-etl.log`,
-        }),
-        new transports.File({
-          level: 'info',
-          filename: `logs/info/${new Date().toISOString()}-etl.log`,
-        }),
-      ],
-    });
-  }
+  ) {}
 
   async load(gameId: number) {
     let gameStatus: AbstractGameState;
@@ -111,19 +95,25 @@ export class GameService {
 
         const allPlayerStats = [...homePlayerStats, ...awayPlayerStats];
 
-        this.logger.info({ allPlayerStats, homePlayerStats, awayPlayerStats });
+        this.logger.log({ allPlayerStats, homePlayerStats, awayPlayerStats });
 
         const createResult = await this.playerGameStatModel.bulkCreate(
           allPlayerStats,
           {
-            ignoreDuplicates: true,
+            updateOnDuplicate: [
+              'assists',
+              'goals',
+              'hits',
+              'points',
+              'penaltyMinutes',
+            ],
           },
         );
 
-        this.logger.info({ createResult });
-      } catch (currentError) {
-        this.logger.error({
-          currentError,
+        this.logger.log({ createResult });
+      } catch (error) {
+        this.logger.error('There was an error saving player stats', {
+          error,
           gameId,
           homePlayers,
           homeTeam,
@@ -131,7 +121,6 @@ export class GameService {
           awayTeam,
         });
 
-        // Not sure if I want to do this yet
         gameStatus = 'Final';
       }
     } while (gameStatus === 'Live');

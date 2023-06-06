@@ -49,7 +49,7 @@ export class PlayerStatsService {
     return result;
   }
 
-  private generateWhereClause({
+  generateWhereClause({
     gameIds,
     playerIds,
     playerNumbers,
