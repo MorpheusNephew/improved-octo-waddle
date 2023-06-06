@@ -59,6 +59,8 @@ export class PlayerStatsService {
     hits,
     points,
     playerPositions,
+    teamIds,
+    opponentTeamIds,
   }: QueryPlayerStatsInput) {
     const clauseInputs: {
       data: any;
@@ -78,6 +80,8 @@ export class PlayerStatsService {
       { data: hits, column: 'hits', operator: true },
       { data: points, column: 'points', operator: true },
       { data: playerPositions, column: 'playerPosition' },
+      { data: teamIds, column: 'teamId' },
+      { data: opponentTeamIds, column: 'opponentTeamId' },
     ];
     const whereClause: Record<any, any> = {};
 

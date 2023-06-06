@@ -45,6 +45,18 @@ export class QueryPlayerStatsInput {
   })
   playerIds?: number[];
 
+  @Field(() => [Int], {
+    description: 'An array of teams to query',
+    nullable: true,
+  })
+  teamIds?: number[];
+
+  @Field(() => [Int], {
+    description: 'An array of opponents to query',
+    nullable: true,
+  })
+  opponentTeamIds?: number[];
+
   @Field(() => [String], {
     description: 'An array of player numbers to query',
     nullable: true,
