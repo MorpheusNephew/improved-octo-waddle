@@ -1,4 +1,4 @@
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { InputType, Field, Int, registerEnumType } from '@nestjs/graphql';
 
 @InputType()
 export class QueryPlayerStatsQueryOptionsInput {
@@ -20,6 +20,17 @@ class QueryPlayerStatsStatisticsInput {
   value: number;
 }
 
+export enum PlayerPosition {
+  GOALIE = 'Goalie',
+  DEFENSEMAN = 'Defenseman',
+  RIGHT_WING = 'Right Wing',
+  LEFT_WING = 'Left Wing',
+  CENTER = 'Center',
+  UNKNOWN = 'Unknown',
+}
+
+registerEnumType(PlayerPosition, { name: 'PlayerPosition' });
+
 @InputType()
 export class QueryPlayerStatsInput {
   @Field(() => [Int], {
@@ -40,10 +51,8 @@ export class QueryPlayerStatsInput {
   })
   playerNumbers?: string[];
 
-  @Field(() => QueryPlayerStatsQueryOptionsInput, {
-    nullable: true,
-  })
-  options?: QueryPlayerStatsQueryOptionsInput;
+  @Field(() => [PlayerPosition], { description: '', nullable: true })
+  playerPositions?: PlayerPosition[];
 
   @Field(() => QueryPlayerStatsStatisticsInput, {
     description: 'Player age',
@@ -74,4 +83,9 @@ export class QueryPlayerStatsInput {
     nullable: true,
   })
   points: QueryPlayerStatsStatisticsInput;
+
+  @Field(() => QueryPlayerStatsQueryOptionsInput, {
+    nullable: true,
+  })
+  options?: QueryPlayerStatsQueryOptionsInput;
 }
