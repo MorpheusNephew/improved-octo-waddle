@@ -1,3 +1,5 @@
+---
+version: '3'
 services:
   db:
     image: postgres
@@ -9,6 +11,9 @@ services:
       - POSTGRES_PASSWORD=postgres
     ports:
       - 5432:5432
+    networks:
+      - db
+
   rabbitMq:
     image: rabbitmq:management
     volumes:
@@ -16,6 +21,9 @@ services:
     ports:
       - 15672:15672
       - 5672:5672
+    networks:
+      - rabbitMq
+
   api:
     build: ./api
     environment:
@@ -30,6 +38,9 @@ services:
       - RABBITMQ_QUEUE=stats_ingest_queue
     ports:
       - 3000:3000
+    networks:
+      - db
+      - rabbitMq
     depends_on:
       - db
       - etl
@@ -46,8 +57,13 @@ services:
       - RABBITMQ_HOST=rabbitMq
       - RABBITMQ_PORT=5672
       - RABBITMQ_QUEUE=stats_ingest_queue
-    deploy:
-      replicas: 3
+    networks:
+      - db
+      - rabbitMq
     depends_on:
       - db
       - rabbitMq
+
+networks:
+  db:
+  rabbitMq:
