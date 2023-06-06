@@ -5,6 +5,8 @@ I just wanted to have some fun with some data pipelines and messing around with 
 - [Pipeline for NHL Data](#pipeline-for-nhl-data)
   - [Running locally](#running-locally)
   - [Usage](#usage)
+    - [Load Game/Season](#load-gameseason)
+    - [Query player stats](#query-player-stats)
   - [Components / Design Decisions](#components--design-decisions)
     - [GraphQL API](#graphql-api)
     - [RabbitMQ](#rabbitmq)
@@ -37,6 +39,81 @@ docker compose down
 After running the `docker compose up` command before using the API check the health check (GET http://localhost:3000/health) since RabbitMQ takes some time to setup even with the queue already being created and also for PostgreSQL to initialize itself for the first time.
 
 Once everything is up and running you can check out the GraphQL schema and documentation by going to the [playground](https://docs.nestjs.com/graphql/quick-start#graphql-playground) at http://localhost:3000/graphql
+
+### Load Game/Season
+
+Before you can query any player stats you first need to load some data you can do so by loading a season or a game
+
+request
+
+```graphql
+mutation LoadPlayersStats($loadPlayersStatsInput: LoadPlayersStatsInput!) {
+  loadPlayersStats(loadPlayersStatsInput: $loadPlayersStatsInput) {
+    message
+  }
+}
+```
+
+variables (loading a season)
+
+```json
+{
+  "loadPlayersStatsInput": {
+    "seasonId": "20182019"
+  }
+}
+```
+
+variables (loading a game)
+
+```json
+{
+  "loadPlayersStatsInput": {
+    "gameId": 2022010001
+  }
+}
+```
+
+### Query player stats
+
+Once player stats have been loaded you can begin to query player stats. The example below returns results where players have scored at least 3 goals in a game against the Ottawa Senators (opponentTeamId: 9) or the Los Angeles Kings (opponentTeamId: 26)
+
+```graphql
+query PlayersStats($queryPlayerStatsInput: QueryPlayerStatsInput!) {
+  playerStats(queryPlayerStatsInput: $queryPlayerStatsInput) {
+    playerName
+    teamName
+    playerAge
+    playerPosition
+    points
+    penaltyMinutes
+    opponentTeamName
+    playerNumber
+    teamId
+    teamName
+    opponentTeamId
+    opponentTeamName
+  }
+}
+```
+
+variables
+
+```json
+{
+  "queryPlayerStatsInput": {
+    "points": {
+      "operator": "gte",
+      "value": 3
+    },
+    "opponentTeamIds": [9, 26],
+    "options": {
+      "limit": 100,
+      "offset": 1
+    }
+  }
+}
+```
 
 ## Components / Design Decisions
 
@@ -93,6 +170,8 @@ sequenceDiagram
 ## What else I would do
 
 Something else I would've considered doing if I didn't want to time box this would be to implement the streaming of game stats in the context of a live game scenario. To do this I would've added Kafka for the streaming from PostgreSQL in combination of using GraphQL's subscription to get real-time stat updates.
+
+In regards to querying, for simplicity I made majority of queries operate in an OR fashion, but I would update that to allow the querier to determine if they want determine if the queries should use OR or AND similarly to how I've implemented the age or stats properties where the querier chooses the comparison operator and provides the value.
 
 Another addition would be an events API. The purpose of this would be to allow for the user(s) to be able to query stats currently being processed based on a status identifier. So if player stats are currently being loaded based on a game or season id there would be an identifier or correlation id that can be used to query if there were errors in the ingestion process or if it's finished and the duration of the loading of player stats.
 
