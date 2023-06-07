@@ -36,6 +36,3 @@ lerna-debug.log*
 
 # Environment file
 .env
-
-# Graphql Schema File
-schema.gql
