@@ -65,6 +65,12 @@ input QueryPlayerStatsInput {
   """An array of players to query"""
   playerIds: [Int!]
 
+  """An array of teams to query"""
+  teamIds: [Int!]
+
+  """An array of opponents to query"""
+  opponentTeamIds: [Int!]
+
   """An array of player numbers to query"""
   playerNumbers: [String!]
 
