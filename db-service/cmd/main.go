@@ -11,13 +11,13 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello world")
+	fmt.Println("Connecting to database")
 
 	db := database.GetDatabase()
 
-	done := getDoneChannel()
-
 	fmt.Println("Connected to postgres db")
+
+	done := getDoneChannel()
 
 	var results []models.PlayerGameStats
 	db.Where("\"gameId\" = ?", 2018020162).Find(&results)
