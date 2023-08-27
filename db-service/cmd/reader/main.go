@@ -9,6 +9,8 @@ import (
 )
 
 func main() {
+	fmt.Println("Starting db reader service...")
+
 	utils.Runner(func(db *gorm.DB) {
 		var results []models.PlayerGameStats
 		db.Where("\"gameId\" = ?", 2018020162).Find(&results)
