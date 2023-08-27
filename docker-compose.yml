@@ -66,8 +66,10 @@ services:
       - db
       - rabbitMq
 
-  dbService:
-    build: ./db-service
+  dbReaderService:
+    build:
+      context: ./db-service
+      dockerfile: reader.Dockerfile
     environment:
       - POSTGRES_DB=sports
       - POSTGRES_USER=postgres
