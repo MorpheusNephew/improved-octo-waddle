@@ -66,6 +66,20 @@ services:
       - db
       - rabbitMq
 
+  dbService:
+    build: ./db-service
+    environment:
+      - POSTGRES_DB=sports
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+    restart: unless-stopped
+    networks:
+      - db
+    depends_on:
+      - db
+
 networks:
   db:
   rabbitMq:
