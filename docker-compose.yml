@@ -14,7 +14,7 @@ services:
     networks:
       - db
 
-  rabbitMq:
+  rabbit-mq:
     image: rabbitmq:management
     volumes:
       - ./data/rabbit_data:/var/lib/rabbitmq
@@ -22,7 +22,7 @@ services:
       - 15672:15672
       - 5672:5672
     networks:
-      - rabbitMq
+      - rabbit-mq
 
   api:
     build: ./api
@@ -33,7 +33,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
-      - RABBITMQ_HOST=rabbitMq
+      - RABBITMQ_HOST=rabbit-mq
       - RABBITMQ_PORT=5672
       - RABBITMQ_QUEUE=stats_ingest_queue
     restart: unless-stopped
@@ -41,11 +41,13 @@ services:
       - 3000:3000
     networks:
       - db
-      - rabbitMq
+      - rabbit-mq
+      - db-reader-service
     depends_on:
       - db
       - etl
-      - rabbitMq
+      - rabbit-mq
+      - db-reader-service
 
   etl:
     build: ./etl
@@ -55,18 +57,37 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
-      - RABBITMQ_HOST=rabbitMq
+      - RABBITMQ_HOST=rabbit-mq
       - RABBITMQ_PORT=5672
       - RABBITMQ_QUEUE=stats_ingest_queue
     restart: unless-stopped
     networks:
       - db
-      - rabbitMq
+      - rabbit-mq
+      - db-writer-service
     depends_on:
       - db
-      - rabbitMq
+      - rabbit-mq
+      - db-writer-service
 
-  dbReaderService:
+  db-writer-service:
+    build:
+      context: ./db-service
+      dockerfile: writer.Dockerfile
+    environment:
+      - POSTGRES_DB=sports
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+    restart: unless-stopped
+    networks:
+      - db
+      - db-writer-service
+    depends_on:
+      - db
+
+  db-reader-service:
     build:
       context: ./db-service
       dockerfile: reader.Dockerfile
@@ -79,9 +100,12 @@ services:
     restart: unless-stopped
     networks:
       - db
+      - db-reader-service
     depends_on:
       - db
 
 networks:
   db:
-  rabbitMq:
+  rabbit-mq:
+  db-writer-service:
+  db-reader-service:
