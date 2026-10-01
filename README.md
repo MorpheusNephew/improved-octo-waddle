@@ -189,7 +189,7 @@ sequenceDiagram
   Client->>GraphQL: store stats from seasonId
   GraphQL->>ETL: emit `load_players_stats` for season (via RabbitMQ)
   ETL->>NHL API: request each team schedule for seasonId
-  NHL API-->>ETL: team schedules returned; game IDs deduplicated
+  NHL API-->>ETL: team schedules returned, game IDs deduplicated
   ETL->>NHL API: get games w/ player stats
   NHL API-->>ETL: games w/ player stats
   ETL->>PostgreSQL: store player stats
