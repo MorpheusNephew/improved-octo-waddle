@@ -28,18 +28,18 @@ describe('NhlService', () => {
   describe('getSeason', () => {
     it('should retrieve season', async () => {
       // Arrange
-      const seasonId = faker.number.int().toString();
+      const seasonId = '20182019';
 
-      mockedHttpServiceGet.mockReturnValue(of({ status: 200, data: seasonId }));
+      mockedHttpServiceGet.mockReturnValue(of({ status: 200, data: { games: [] } }));
 
       // Act
       const result = await service.getSeason(seasonId);
 
       // Assert
       expect(mockedHttpServiceGet).toHaveBeenCalledWith(
-        `/schedule?season=${seasonId}`,
+        `/club-schedule-season/ARI/${seasonId}`,
       );
-      expect(result).toBe(seasonId);
+      expect(result).toStrictEqual({ games: [] });
     });
 
     it('should fail to get season', async () => {
@@ -72,7 +72,7 @@ describe('NhlService', () => {
 
       // Assert
       expect(mockedHttpServiceGet).toHaveBeenCalledWith(
-        `/game/${gameId}/feed/live`,
+        `/gamecenter/${gameId}/boxscore`,
       );
       expect(result).toBe(gameId);
     });

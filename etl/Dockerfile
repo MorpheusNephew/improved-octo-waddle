@@ -1,14 +1,16 @@
-FROM node:18-alpine
+FROM node:18.17.1-alpine
 
 WORKDIR /user/src/app
 
 COPY . .
 
-RUN npm install -g @nestjs/cli
+RUN npm install -g @nestjs/cli@10.1.15
 
-RUN npm ci --omit=dev
+RUN npm ci
 
 RUN npm run build
+
+RUN npm prune --omit=dev
 
 USER node
 

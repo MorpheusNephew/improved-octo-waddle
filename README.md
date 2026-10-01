@@ -7,6 +7,7 @@ I just wanted to have some fun with some data pipelines and messing around with 
   - [Usage](#usage)
     - [Load Game/Season](#load-gameseason)
     - [Query player stats](#query-player-stats)
+  - [NHL data source](#nhl-data-source)
   - [Components / Design Decisions](#components--design-decisions)
     - [GraphQL API](#graphql-api)
     - [RabbitMQ](#rabbitmq)
@@ -34,11 +35,28 @@ Once you're done you can stop all services by running
 docker compose down
 ```
 
+### Starting only PostgreSQL
+
+For a clean-machine database check, or if the full stack does not come up,
+run the database helper from the repository root:
+
+```bash
+./scripts/start-db.sh
+```
+
+It creates the local PostgreSQL data directory, pulls the pinned database
+image if necessary, starts only the `db` service, and waits until it accepts
+connections on `localhost:5432`. Inspect a failure with `docker compose logs db`.
+
+The external images, Node build images, and Nest build CLI are pinned to releases
+current when this repository was last updated (20 August 2023), so future builds
+do not silently use newer `latest` dependencies.
+
 ## Usage
 
-After running the `docker compose up` command before using the API check the health check (GET http://localhost:3000/health) since RabbitMQ takes some time to setup even with the queue already being created and also for PostgreSQL to initialize itself for the first time.
+After running `docker compose up`, wait until all services are running before sending a load request. Check the API health endpoint at <http://localhost:3000/health> and use `docker compose ps` to verify that the API, ETL, RabbitMQ, and PostgreSQL containers are up. RabbitMQ and the ETL consumer can take a few seconds to initialize after the API health endpoint responds.
 
-Once everything is up and running you can check out the GraphQL schema and documentation by going to the [playground](https://docs.nestjs.com/graphql/quick-start#graphql-playground) at http://localhost:3000/graphql
+Once everything is up, open the GraphQL schema and documentation at <http://localhost:3000/graphql>.
 
 ### Load Game/Season
 
@@ -69,14 +87,16 @@ variables (loading a game)
 ```json
 {
   "loadPlayersStatsInput": {
-    "gameId": 2022010001
+    "gameId": 2018020003
   }
 }
 ```
 
+The mutation queues an asynchronous ingestion job, so it returning a message means the job was accepted—not that rows have already been saved. Wait briefly, then query the stats or inspect the ETL logs with `docker compose logs etl`.
+
 ### Query player stats
 
-Once player stats have been loaded you can begin to query player stats. The example below returns results where players have scored at least 3 goals in a game against the Ottawa Senators (opponentTeamId: 9) or the Los Angeles Kings (opponentTeamId: 26)
+Once player stats have been loaded you can begin to query player stats. The example below returns results where players recorded at least 3 points in a game against the Ottawa Senators (opponentTeamId: 9) or the Los Angeles Kings (opponentTeamId: 26).
 
 ```graphql
 query PlayersStats($queryPlayerStatsInput: QueryPlayerStatsInput!) {
@@ -93,6 +113,21 @@ query PlayersStats($queryPlayerStatsInput: QueryPlayerStatsInput!) {
     teamName
     opponentTeamId
     opponentTeamName
+  }
+}
+```
+
+For example, after loading game `2018020003`, query its rows directly:
+
+```graphql
+query GameStats {
+  playerStats(queryPlayerStatsInput: { gameIds: [2018020003] }) {
+    gameId
+    playerName
+    teamName
+    goals
+    assists
+    points
   }
 }
 ```
@@ -115,6 +150,16 @@ variables
 }
 ```
 
+## NHL data source
+
+The original NHL stats API used by this project is no longer available. The ETL now uses the NHL's current web API at <https://api-web.nhle.com/v1>:
+
+- A game is loaded from `/gamecenter/{gameId}/boxscore`.
+- A season is assembled from each team's `/club-schedule-season/{teamAbbrev}/{seasonId}` schedule. The resulting game IDs are deduplicated before ingestion.
+- The service saves completed (`FINAL` or `OFF`) and in-progress (`LIVE` or `CRIT`) games. Season loading processes up to four games concurrently.
+
+The NHL API is external and its responses can change independently of this project. A known completed game such as `2018020003` is useful as a quick smoke test.
+
 ## Components / Design Decisions
 
 ### GraphQL API
@@ -127,7 +172,7 @@ I knew that I wanted to use a microservice architecture and with that would be u
 
 ### Game Stats ETL
 
-This service is what receives a request to either load a game or a season's worth of games into the database to to be queried later. It also checks game status (if a game is live or not) to determine if it needs to continue to pull game data for storage.
+This service receives a request to load either one game or a season's games into the database for later querying. It stores player statistics when the NHL API reports a game as `LIVE`, `CRIT`, `FINAL`, or `OFF`; it does not continuously poll a live game for updates.
 
 ### PostgreSQL
 
@@ -142,9 +187,9 @@ The diagram below goes over the flow when a seasonId is provided. The flow is th
 ```mermaid
 sequenceDiagram
   Client->>GraphQL: store stats from seasonId
-  GraphQL->>ETL: emit `load_player_stats` for season (via RabbitMQ)
-  ETL->>NHL API: request schedule for seasonId
-  NHL API-->>ETL: season schedule returned with dates and games on those dates
+  GraphQL->>ETL: emit `load_players_stats` for season (via RabbitMQ)
+  ETL->>NHL API: request each team schedule for seasonId
+  NHL API-->>ETL: team schedules returned; game IDs deduplicated
   ETL->>NHL API: get games w/ player stats
   NHL API-->>ETL: games w/ player stats
   ETL->>PostgreSQL: store player stats
@@ -171,7 +216,7 @@ sequenceDiagram
 
 Something else I would've considered doing if I didn't want to time box this would be to implement the streaming of game stats in the context of a live game scenario. To do this I would've added Kafka for the streaming from PostgreSQL in combination of using GraphQL's subscription to get real-time stat updates.
 
-In regards to querying, for simplicity I made majority of queries operate in an OR fashion, but I would update that to allow the querier to determine if they want determine if the queries should use OR or AND similarly to how I've implemented the age or stats properties where the querier chooses the comparison operator and provides the value.
+In regards to querying, filters are currently combined with AND. I would add a way for callers to choose AND or OR behavior, while retaining the comparison operators used by the age and statistic filters.
 
 Another addition would be an events API. The purpose of this would be to allow for the user(s) to be able to query stats currently being processed based on a status identifier. So if player stats are currently being loaded based on a game or season id there would be an identifier or correlation id that can be used to query if there were errors in the ingestion process or if it's finished and the duration of the loading of player stats.
 

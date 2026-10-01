@@ -1,8 +1,7 @@
 ---
-version: '3'
 services:
   db:
-    image: postgres
+    image: postgres:15.4
     volumes:
       - ./data/pg_data/db:/var/lib/postgresql/data
     environment:
@@ -15,7 +14,7 @@ services:
       - db
 
   rabbitMq:
-    image: rabbitmq:management
+    image: rabbitmq:3.12.3-management
     volumes:
       - ./data/rabbit_data:/var/lib/rabbitmq
     ports:

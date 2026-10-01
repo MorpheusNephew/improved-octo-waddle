@@ -5,7 +5,7 @@ import { HttpModule } from '@nestjs/axios';
 @Module({
   imports: [
     HttpModule.register({
-      baseURL: 'https://statsapi.web.nhl.com/api/v1',
+      baseURL: 'https://api-web.nhle.com/v1',
       headers: { 'Content-Type': 'application/json' },
     }),
   ],

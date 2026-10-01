@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { NhlService } from '../nhl/nhl.service';
 import { GameService } from '../game/game.service';
-import * as pMap from 'p-map';
+import pMap from 'p-map';
 
 @Injectable()
 export class SeasonService {
@@ -13,17 +13,14 @@ export class SeasonService {
   async load(seasonId: string) {
     const season = await this.nhlService.getSeason(seasonId);
 
-    if (!season || season.dates.length < 1) {
+    if (!season || season.games.length < 1) {
       return;
     }
 
-    const loadGamesMapper = async (game: { gamePk: number }) =>
-      await this.gameService.load(game.gamePk);
+    const gameIds = [...new Set(season.games.map((game) => game.id))];
+    const loadGamesMapper = async (gameId: number) =>
+      await this.gameService.load(gameId);
 
-    const getGamesForDateMapper = async (date: {
-      games: { gamePk: number }[];
-    }) => await pMap(date.games, loadGamesMapper);
-
-    await pMap(season.dates, getGamesForDateMapper);
+    await pMap(gameIds, loadGamesMapper, { concurrency: 4 });
   }
 }
