@@ -1,11 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NhlService } from '../nhl/nhl.service';
 import { isEmpty } from 'lodash';
-import {
-  AbstractGameState,
-  PlayersBoxscore,
-  TeamDto,
-} from '../nhl/dto/game.dto';
+import { GoalieStatsDto, SkaterStatsDto, TeamDto } from '../nhl/dto/game.dto';
 import { PlayerGameStat } from './models/playerGameStat.model';
 import { InjectModel } from '@nestjs/sequelize';
 
@@ -20,109 +16,75 @@ export class GameService {
   ) {}
 
   async load(gameId: number) {
-    let gameStatus: AbstractGameState;
+    const game = await this.nhlService.getGame(gameId);
 
-    do {
-      const game = await this.nhlService.getGame(gameId);
-      gameStatus = game.gameData.status.abstractGameState;
+    if (!['LIVE', 'CRIT', 'FINAL', 'OFF'].includes(game.gameState)) {
+      return;
+    }
 
-      if (gameStatus === 'Preview') {
-        return;
-      }
+    const teamName = (team: TeamDto) =>
+      `${team.placeName.default} ${team.commonName.default}`;
+    const extractSkaterStats = (
+      players: SkaterStatsDto[], team: TeamDto, opponentTeam: TeamDto,
+    ) => players.map((player) => ({
+      gameId,
+      playerId: player.playerId,
+      playerName: player.name.default,
+      teamId: team.id,
+      teamName: teamName(team),
+      playerNumber: String(player.sweaterNumber),
+      playerPosition: player.position,
+      assists: player.assists,
+      goals: player.goals,
+      hits: player.hits ?? 0,
+      points: player.assists + player.goals,
+      penaltyMinutes: player.pim ?? 0,
+      opponentTeamName: teamName(opponentTeam),
+      opponentTeamId: opponentTeam.id,
+    }));
+    const extractGoalieStats = (
+      players: GoalieStatsDto[], team: TeamDto, opponentTeam: TeamDto,
+    ) => players.map((player) => ({
+      gameId,
+      playerId: player.playerId,
+      playerName: player.name.default,
+      teamId: team.id,
+      teamName: teamName(team),
+      playerNumber: String(player.sweaterNumber),
+      playerPosition: player.position,
+      assists: 0,
+      goals: 0,
+      hits: 0,
+      points: 0,
+      penaltyMinutes: player.pim ?? 0,
+      opponentTeamName: teamName(opponentTeam),
+      opponentTeamId: opponentTeam.id,
+    }));
 
-      const {
-        gameData: {
-          teams: { home: homeTeam, away: awayTeam },
-          players: allPlayers,
-        },
-        liveData: {
-          boxscore: {
-            teams: {
-              home: { players: homePlayers },
-              away: { players: awayPlayers },
-            },
-          },
-        },
-      } = game;
+    const { homeTeam, awayTeam, playerByGameStats } = game;
+    const homePlayerStats = [
+      ...extractSkaterStats(playerByGameStats.homeTeam.forwards, homeTeam, awayTeam),
+      ...extractSkaterStats(playerByGameStats.homeTeam.defense, homeTeam, awayTeam),
+      ...extractGoalieStats(playerByGameStats.homeTeam.goalies, homeTeam, awayTeam),
+    ];
+    const awayPlayerStats = [
+      ...extractSkaterStats(playerByGameStats.awayTeam.forwards, awayTeam, homeTeam),
+      ...extractSkaterStats(playerByGameStats.awayTeam.defense, awayTeam, homeTeam),
+      ...extractGoalieStats(playerByGameStats.awayTeam.goalies, awayTeam, homeTeam),
+    ];
+    const allPlayerStats = [...homePlayerStats, ...awayPlayerStats];
 
-      const extractPlayersStats = (
-        playersInfo: PlayersBoxscore,
-        team: TeamDto,
-        opponentTeam: TeamDto,
-      ) =>
-        Object.entries(playersInfo)
-          .filter((playerInfo) => !isEmpty(playerInfo))
-          .filter(([_id, player]) => !isEmpty(player.stats))
-          .map(([id, player]) => {
-            const playerInfo = allPlayers[id];
-            const playerStats =
-              player.stats.skaterStats ?? player.stats.goalieStats;
+    if (isEmpty(allPlayerStats)) {
+      return;
+    }
 
-            return {
-              gameId,
-              playerId: player.person.id,
-              playerName: player.person.fullName,
-              teamId: team.id,
-              teamName: team.name,
-              playerAge: playerInfo.currentAge,
-              playerNumber: playerInfo.primaryNumber,
-              playerPosition: player.position.name,
-              assists: playerStats.assists,
-              goals: playerStats.goals,
-              hits: playerStats.hits,
-              points: playerStats.assists + playerStats.goals, // https://en.wikipedia.org/wiki/Point_(ice_hockey)
-              penaltyMinutes: playerStats.penaltyMinutes,
-              opponentTeamName: opponentTeam.name,
-              opponentTeamId: opponentTeam.id,
-            };
-          });
-
-      if (isEmpty(allPlayers)) {
-        return;
-      }
-
-      try {
-        const homePlayerStats = extractPlayersStats(
-          homePlayers,
-          homeTeam,
-          awayTeam,
-        );
-        const awayPlayerStats = extractPlayersStats(
-          awayPlayers,
-          awayTeam,
-          homeTeam,
-        );
-
-        const allPlayerStats = [...homePlayerStats, ...awayPlayerStats];
-
-        this.logger.log({ allPlayerStats, homePlayerStats, awayPlayerStats });
-
-        const createResult = await this.playerGameStatModel.bulkCreate(
-          allPlayerStats,
-          {
-            updateOnDuplicate: [
-              'assists',
-              'goals',
-              'hits',
-              'points',
-              'penaltyMinutes',
-            ],
-          },
-        );
-
-        this.logger.log({ createResult });
-      } catch (error) {
-        this.logger.error('There was an error saving player stats', {
-          error,
-          gameId,
-          homePlayers,
-          homeTeam,
-          awayPlayers,
-          awayTeam,
-        });
-
-        gameStatus = 'Final';
-      }
-    } while (gameStatus === 'Live');
+    try {
+      const createResult = await this.playerGameStatModel.bulkCreate(allPlayerStats, {
+        updateOnDuplicate: ['assists', 'goals', 'hits', 'points', 'penaltyMinutes'],
+      });
+      this.logger.log({ gameId, playersSaved: createResult.length });
+    } catch (error) {
+      this.logger.error('There was an error saving player stats', { error, gameId });
+    }
   }
 }
